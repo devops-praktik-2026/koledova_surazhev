@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from orders.db import get_session  # Поменяли на get_session
@@ -18,4 +18,15 @@ def create_order(
     db.add(db_order)
     db.commit()
     db.refresh(db_order)
+    return db_order
+
+
+@router.get("/orders/{order_id}", response_model=OrderResponse)
+def get_order(order_id: int, db: Session = Depends(get_session)):
+    db_order = db.query(Order).filter(Order.id == order_id).first()
+    if not db_order:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Заказ с номером {order_id} не найден",
+        )
     return db_order
