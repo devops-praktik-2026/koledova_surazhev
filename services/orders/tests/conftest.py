@@ -12,6 +12,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from orders.accounts_client import (
+    ensure_account_exists,
+)  # Добавили импорт проверки
 from orders.db import Base, get_session
 from orders.main import app
 
@@ -30,9 +33,18 @@ def client() -> Iterator[TestClient]:
         with TestSession() as session:
             yield session
 
+    # По умолчанию для всех старых тестов считаем, что проверка клиента всегда проходит успешно (ничего не делает)
+    def mock_ensure_account_exists(account_id: int) -> None:
+        return None
+
     app.dependency_overrides[get_session] = override_get_session
+    app.dependency_overrides[ensure_account_exists] = (
+        mock_ensure_account_exists  # Заглушка сети для старых тестов
+    )
+
     with TestClient(app) as test_client:
         yield test_client
+
     app.dependency_overrides.clear()
     Base.metadata.drop_all(engine)
 
