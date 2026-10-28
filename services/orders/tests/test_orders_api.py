@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from fastapi import HTTPException, status
 
 from orders.accounts_client import ensure_account_exists
@@ -25,9 +27,6 @@ def test_create_order_client_not_found(client):
 
     # Очищаем подмену после завершения теста
     app.dependency_overrides.clear()
-
-
-from unittest.mock import patch
 
 
 def test_create_order_client_service_unavailable(client):
