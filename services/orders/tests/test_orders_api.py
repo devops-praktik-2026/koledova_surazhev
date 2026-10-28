@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from fastapi import HTTPException, status
 
 from orders.accounts_client import ensure_account_exists
@@ -25,3 +27,24 @@ def test_create_order_client_not_found(client):
 
     # Очищаем подмену после завершения теста
     app.dependency_overrides.clear()
+
+
+def test_create_order_client_service_unavailable(client):
+    """Тест: если сервис клиентов не отвечает, возвращается код 503"""
+
+    from fastapi import HTTPException
+
+    # Имитируем падение сетевого клиента httpx, выбрасывая ошибку 503
+    with patch(
+        "orders.api.ensure_account_exists",
+        side_effect=HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Сервис клиентов не отвечает",
+        ),
+    ):
+        payload = {"client_id": 1, "item_name": "Телевизор", "quantity": 1}
+        response = client.post("/orders", json=payload)
+
+        # Проверяем, что вернулся код 503
+        assert response.status_code == 503
+        assert "Сервис клиентов не отвечает" in response.json()["detail"]
