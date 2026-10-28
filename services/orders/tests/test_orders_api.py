@@ -10,6 +10,7 @@ def test_get_order_success(client):
     assert response.status_code == 200
     assert response.json()["item_name"] == "Книга"
 
+
 def test_get_order_not_found(client):
     """Тест получения несуществующего заказа (Код 404)"""
     response = client.get("/orders/9999")
