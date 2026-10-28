@@ -1,5 +1,3 @@
-
-
 def test_create_order_returns_201(client):
     """Тест успешного создания заказа (Код 201)"""
     payload = {"client_id": 1, "item_name": "Тестовый товар", "quantity": 5}
