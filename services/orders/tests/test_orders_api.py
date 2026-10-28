@@ -18,6 +18,7 @@ def test_invalid_payload_returns_422(client):
     response = client.post("/orders", json=payload)
     assert response.status_code == 422
 
+
 def test_get_client_orders_success(client):
     """Тест получения списка заказов конкретного клиента (Код 200)"""
     # Создаём два заказа для клиента с ID 5
