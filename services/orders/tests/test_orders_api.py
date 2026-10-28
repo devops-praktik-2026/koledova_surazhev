@@ -50,3 +50,13 @@ def test_get_order_not_found(client):
     response = client.get("/orders/9999")
     assert response.status_code == 404
     assert "9999" in response.json()["detail"]
+
+def test_create_order_client_not_found(client, requests_mock):
+    """Тест: заказ не создается, если сервис клиентов вернул 404"""
+    # Эмулируем ответ от сервиса клиентов: якобы ID 999 не существует
+    requests_mock.get("http://localhost:8001/accounts/999", status_code=404)
+
+    payload = {"client_id": 999, "item_name": "Телефон", "quantity": 1}
+    response = client.post("/orders", json=payload)
+    
+    assert response.status_code == 404
